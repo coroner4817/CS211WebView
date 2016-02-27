@@ -1,7 +1,5 @@
 package com.yingnanwang.cs211webview;
 
-import android.content.Intent;
-import android.hardware.input.InputManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;

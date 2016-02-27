@@ -41,22 +41,23 @@ public class WebViewActivity extends AppCompatActivity {
     private BatteryChangeReceiver batteryChangeReceiver=new BatteryChangeReceiver();
     int count=0;
     boolean nightModeCheck=false;
+    String urlGoTo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
 
-        String url;
+
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras == null) {
-                url= null;
+                urlGoTo= null;
             } else {
-                url= extras.getString("url");
+                urlGoTo= extras.getString("url");
             }
         } else {
-            url= (String) savedInstanceState.getSerializable("url");
+            urlGoTo= (String) savedInstanceState.getSerializable("url");
         }
 
         mWebView=(WebView)findViewById(R.id.webView);
@@ -64,8 +65,7 @@ public class WebViewActivity extends AppCompatActivity {
         energyEfficientSetting();
 
 
-        mWebView.loadUrl(url);
-//        mWebView.loadUrl("javascript:document.getElementsByTagName('body').style.backgroundColor='black';");
+        mWebView.loadUrl(urlGoTo);
 
 
     }
@@ -73,7 +73,6 @@ public class WebViewActivity extends AppCompatActivity {
     private void energyEfficientSetting(){
         ScreenOffBroadcast();
         BatteryLifeMonitor();
-        // TimeMonitor();
     }
 
     private void ScreenOffBroadcast()
@@ -123,7 +122,7 @@ public class WebViewActivity extends AppCompatActivity {
     private void NightModeSwitch(int flag){
         if(flag==0){
             // day
-            mWebView.loadUrl(url);
+            mWebView.loadUrl(urlGoTo);
         }else{
             //night
             String command = "javascript:(function() { "
@@ -185,10 +184,12 @@ public class WebViewActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.night:
                 //night mode
+                NightModeSwitch(1);
                 Toast.makeText(WebViewActivity.this, "Night Mode", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.day:
                 //day mode
+                NightModeSwitch(0);
                 Toast.makeText(WebViewActivity.this, "Day Mode", Toast.LENGTH_SHORT).show();
                 return true;
             default:
@@ -225,7 +226,7 @@ public class WebViewActivity extends AppCompatActivity {
         @Override
         public void onPageFinished(WebView view, String url) {
             count++;
-            Toast.makeText(WebViewActivity.this, "Open: "+url+" "+count, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(WebViewActivity.this, "Open: "+url+" "+count, Toast.LENGTH_SHORT).show();
             super.onPageFinished(view, url);
 
         }
@@ -296,7 +297,20 @@ public class WebViewActivity extends AppCompatActivity {
             android.util.Log.d("Battery: ", "" + batteryPct);
             if(batteryPct<0.15){
                 // enter battery save mode (night mode)
-
+                new AlertDialog.Builder(context)
+                        .setTitle("Night Mode Alert")
+                        .setMessage("Do you want to use night mode?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // night mode
+                                NightModeSwitch(1);
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+                            }
+                        }).show();
             }
             Time now = new Time();
             now.setToNow();
@@ -309,7 +323,7 @@ public class WebViewActivity extends AppCompatActivity {
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 // night mode
-
+                                NightModeSwitch(1);
                             }
                         })
                         .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
