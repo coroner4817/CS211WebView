@@ -24,8 +24,7 @@ import android.widget.Toast;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+
 
 public class WebViewActivity extends AppCompatActivity {
 
@@ -39,21 +38,25 @@ public class WebViewActivity extends AppCompatActivity {
     private WebView mWebView;
     private ScreenStateReceiver mScreenStateReceiver=new ScreenStateReceiver();
     private BatteryChangeReceiver batteryChangeReceiver=new BatteryChangeReceiver();
+<<<<<<< HEAD
     int count=0;
     boolean nightModeCheck=false;
+=======
+    String url;
+>>>>>>> a6cf2987759897df40ac9d897aee9249f638df04
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
 
-        String url;
+
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras == null) {
-                url= null;
+                url = null;
             } else {
-                url= extras.getString("url");
+                url = extras.getString("url");
             }
         } else {
             url= (String) savedInstanceState.getSerializable("url");
@@ -67,10 +70,10 @@ public class WebViewActivity extends AppCompatActivity {
         mWebView.loadUrl(url);
 //        mWebView.loadUrl("javascript:document.getElementsByTagName('body').style.backgroundColor='black';");
 
-
     }
 
-    private void energyEfficientSetting(){
+    private void energyEfficientSetting()
+    {
         ScreenOffBroadcast();
         BatteryLifeMonitor();
         // TimeMonitor();
@@ -232,7 +235,7 @@ public class WebViewActivity extends AppCompatActivity {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if( url.indexOf("facebook")>0 | url.indexOf("facebook")>0 ){
+            if( url.indexOf("facebook") > 0 | url.indexOf("facebook") > 0 ) {
                 if(isAppInstalled("com.facebook.katana")){
                     // open facebook
                     try {
@@ -247,8 +250,13 @@ public class WebViewActivity extends AppCompatActivity {
                 }
             }
 
+<<<<<<< HEAD
+            else if( url.indexOf("youtube")>0 | url.indexOf("Youtube")>0 ){
+                if(isAppInstalled("com.google.android.youtube")){
+=======
             if( url.indexOf("youtube") > 0 | url.indexOf("Youtube") > 0 ) {
                 if(isAppInstalled("com.google.android.youtube")) {
+>>>>>>> a6cf2987759897df40ac9d897aee9249f638df04
                     // open youtube
                     try {
                         PackageManager packageManager = getPackageManager();
@@ -273,6 +281,7 @@ public class WebViewActivity extends AppCompatActivity {
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             return replaceJs(view, url);
         }
+
     }
 
     private class ScreenStateReceiver extends BroadcastReceiver{
@@ -294,7 +303,11 @@ public class WebViewActivity extends AppCompatActivity {
             scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
             float batteryPct = level / (float)scale;
             android.util.Log.d("Battery: ", "" + batteryPct);
+<<<<<<< HEAD
             if(batteryPct<0.15){
+=======
+            if(batteryPct < 0.15){
+>>>>>>> a6cf2987759897df40ac9d897aee9249f638df04
                 // enter battery save mode (night mode)
 
             }
