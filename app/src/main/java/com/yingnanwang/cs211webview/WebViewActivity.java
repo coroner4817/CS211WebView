@@ -1,26 +1,30 @@
 package com.yingnanwang.cs211webview;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+
 
 public class WebViewActivity extends AppCompatActivity {
 
@@ -34,6 +38,8 @@ public class WebViewActivity extends AppCompatActivity {
     private WebView mWebView;
     private ScreenStateReceiver mScreenStateReceiver=new ScreenStateReceiver();
     private BatteryChangeReceiver batteryChangeReceiver=new BatteryChangeReceiver();
+    int count=0;
+    boolean nightModeCheck=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +63,13 @@ public class WebViewActivity extends AppCompatActivity {
         energyEfficientSetting();
 
 
-
         mWebView.loadUrl(url);
     }
 
     private void energyEfficientSetting(){
         ScreenOffBroadcast();
         BatteryLifeMonitor();
+        // TimeMonitor();
     }
 
     private void ScreenOffBroadcast()
@@ -127,13 +133,22 @@ public class WebViewActivity extends AppCompatActivity {
         return installed;
     }
 
+    public InputStream streamFromAsset(final Context ctx, final String file) {
+        try {
+            return ctx.getAssets().open(file);
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
 
-
-
-
-
-
-
+    private WebResourceResponse replaceJs(WebView view, String url) {
+        if (url.startsWith("http://img1.cache.netease.com/f2e/lib/js/ne.js")) {
+            return new WebResourceResponse("text/html", "utf-8",
+                    streamFromAsset(this, "js/hlct-com.js"));
+        } else {
+            return null;
+        }
+    }
 
 
 
@@ -183,7 +198,8 @@ public class WebViewActivity extends AppCompatActivity {
     private class mWebViewClient extends WebViewClient{
         @Override
         public void onPageFinished(WebView view, String url) {
-            Toast.makeText(WebViewActivity.this, "Open: "+url, Toast.LENGTH_SHORT).show();
+            count++;
+            Toast.makeText(WebViewActivity.this, "Open: "+url+" "+count, Toast.LENGTH_SHORT).show();
             super.onPageFinished(view, url);
         }
 
@@ -204,7 +220,7 @@ public class WebViewActivity extends AppCompatActivity {
                 }
             }
 
-            if( url.indexOf("youtube")>0 | url.indexOf("Youtube")>0 ){
+            else if( url.indexOf("youtube")>0 | url.indexOf("Youtube")>0 ){
                 if(isAppInstalled("com.google.android.youtube")){
                     // open youtube
                     try {
@@ -219,7 +235,16 @@ public class WebViewActivity extends AppCompatActivity {
                 }
             }
 
-            return true;
+            else{
+                view.loadUrl(url);
+            }
+
+            return false;
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+            return replaceJs(view, url);
         }
     }
 
@@ -241,11 +266,37 @@ public class WebViewActivity extends AppCompatActivity {
             level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
             float batteryPct = level / (float)scale;
-            android.util.Log.d("Battery: ", ""+batteryPct);
+            android.util.Log.d("Battery: ", "" + batteryPct);
             if(batteryPct<0.15){
                 // enter battery save mode (night mode)
 
             }
+            Time now = new Time();
+            now.setToNow();
+            Log.d("Hour: ",now.hour+"");
+            if((now.hour>0)&&(now.hour<7)&&!nightModeCheck){
+                // enter night mode
+                new AlertDialog.Builder(context)
+                        .setTitle("Night Mode Alert")
+                        .setMessage("Do you want to use night mode?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // night mode
+
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+                            }
+                        }).show();
+
+                nightModeCheck=true;
+            }else{
+                nightModeCheck=false;
+            }
         }
     }
+
+
 }
