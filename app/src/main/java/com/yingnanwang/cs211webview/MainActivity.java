@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
                 if(mUrl.getText().toString().matches("")){
                     Toast.makeText(MainActivity.this, "Please input url", Toast.LENGTH_SHORT).show();
                 }else{
-                    WebViewActivity.actionStart(MainActivity.this, "http://"+mUrl.getText().toString());
+                    WebViewActivity.actionStart(MainActivity.this, "https://" + mUrl.getText().toString());
                 }
             }
         });

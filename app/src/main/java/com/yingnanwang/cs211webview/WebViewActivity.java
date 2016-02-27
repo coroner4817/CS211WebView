@@ -34,19 +34,20 @@ public class WebViewActivity extends AppCompatActivity {
     private WebView mWebView;
     private ScreenStateReceiver mScreenStateReceiver=new ScreenStateReceiver();
     private BatteryChangeReceiver batteryChangeReceiver=new BatteryChangeReceiver();
+    String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
 
-        String url;
+
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
             if(extras == null) {
-                url= null;
+                url = null;
             } else {
-                url= extras.getString("url");
+                url = extras.getString("url");
             }
         } else {
             url= (String) savedInstanceState.getSerializable("url");
@@ -57,11 +58,13 @@ public class WebViewActivity extends AppCompatActivity {
         energyEfficientSetting();
 
 
-
         mWebView.loadUrl(url);
+//        mWebView.loadUrl("javascript:document.getElementsByTagName('body').style.backgroundColor='black';");
+
     }
 
-    private void energyEfficientSetting(){
+    private void energyEfficientSetting()
+    {
         ScreenOffBroadcast();
         BatteryLifeMonitor();
     }
@@ -88,7 +91,10 @@ public class WebViewActivity extends AppCompatActivity {
         mWebView.getSettings().setUseWideViewPort(true);
         mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         mWebView.getSettings().setSupportMultipleWindows(true);
-        mWebView.setWebViewClient(new mWebViewClient());
+        mWebView.setWebViewClient(new mWebViewClient() {
+
+
+        });
     }
 
     private void callHiddenWebViewMethod(String name){
@@ -110,8 +116,21 @@ public class WebViewActivity extends AppCompatActivity {
     private void NightModeSwitch(int flag){
         if(flag==0){
             // day
+            mWebView.loadUrl(url);
         }else{
             //night
+            String command = "javascript:(function() { "
+                    + "var tags = document.getElementsByTagName('*');"
+                    + "var i = tags.length;"
+                    + "while ( i-- ) {"
+                    + "    tags[i].style.backgroundColor = 'black';"
+                    + "    tags[i].style.color = 'white';"
+                    + "}"
+                    + "})()";
+
+            Log.d("WV", "onPageFinished" + "command: " + command);
+
+            mWebView.loadUrl(command);
         }
     }
 
@@ -180,16 +199,23 @@ public class WebViewActivity extends AppCompatActivity {
         this.callHiddenWebViewMethod("onResume");
     }
 
+
+
+
+
+
+
     private class mWebViewClient extends WebViewClient{
         @Override
         public void onPageFinished(WebView view, String url) {
             Toast.makeText(WebViewActivity.this, "Open: "+url, Toast.LENGTH_SHORT).show();
             super.onPageFinished(view, url);
+
         }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if( url.indexOf("facebook")>0 | url.indexOf("facebook")>0 ){
+            if( url.indexOf("facebook") > 0 | url.indexOf("facebook") > 0 ) {
                 if(isAppInstalled("com.facebook.katana")){
                     // open facebook
                     try {
@@ -204,8 +230,8 @@ public class WebViewActivity extends AppCompatActivity {
                 }
             }
 
-            if( url.indexOf("youtube")>0 | url.indexOf("Youtube")>0 ){
-                if(isAppInstalled("com.google.android.youtube")){
+            if( url.indexOf("youtube") > 0 | url.indexOf("Youtube") > 0 ) {
+                if(isAppInstalled("com.google.android.youtube")) {
                     // open youtube
                     try {
                         PackageManager packageManager = getPackageManager();
@@ -221,6 +247,7 @@ public class WebViewActivity extends AppCompatActivity {
 
             return true;
         }
+
     }
 
     private class ScreenStateReceiver extends BroadcastReceiver{
@@ -241,8 +268,8 @@ public class WebViewActivity extends AppCompatActivity {
             level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
             float batteryPct = level / (float)scale;
-            android.util.Log.d("Battery: ", ""+batteryPct);
-            if(batteryPct<0.15){
+            android.util.Log.d("Battery: ", "" + batteryPct);
+            if(batteryPct < 0.15){
                 // enter battery save mode (night mode)
 
             }
